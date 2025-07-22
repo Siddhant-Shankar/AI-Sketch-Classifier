@@ -1,25 +1,17 @@
-# # import numpy as np
-# # cat_data = np.load('dataset/cat.npy')
 
-# # print(cat_data.shape)
 
-# # import matplotlib.pyplot as plt
-# # img = cat_data[1].reshape(28, 28)
-
-# # plt.imshow(img, cmap='gray')
-# # plt.show()
-
-# import numpy as np
-# import matplotlib.pyplot as plt
-# categories = ['car', 'cat', 'dog', 'house', 'tree']
-# for category in categories:
-#     cat_data = np.load(f"dataset/{category}.npy")
-#     img = cat_data[0].reshape(28, 28)
-#     plt.imshow(img, cmap='gray')
-#     plt.title(category)
-#     plt.show(block=False)
-#     plt.pause(2)
-#     plt.close()
+import numpy as np
+import matplotlib.pyplot as plt
+categories = ['car', 'cat', 'dog', 'house', 'tree']
+for category in categories:
+    sample_data = np.load(f"backend/dataset/{category}.npy")
+    print(sample_data.shape)
+    # img = sample_data[2].reshape(28, 28)
+    # plt.imshow(img, cmap='gray')
+    # plt.title(category)
+    # plt.show(block=False)
+    # plt.pause(2)
+    # plt.close()
 
 
 
@@ -38,17 +30,43 @@ categories = ['car', 'cat', 'dog', 'house', 'tree']
 data = []
 labels = []
 
-#Load data and create labels
-for idx, category in enumerate(categories): 
+# Find the minimum number of samples across all categories
+min_samples = min([np.load(f'backend/dataset/{category}.npy').shape[0] for category in categories])
+
+# Load data and create balanced labels
+for idx, category in enumerate(categories):
     imgs = np.load(f'backend/dataset/{category}.npy')
-    #print(imgs.shape[0]) #Seeing how many pictures are in the numpy array
+    if imgs.shape[0] > min_samples:
+        # Randomly select min_samples indices
+        selected_indices = np.random.choice(imgs.shape[0], min_samples, replace=False)
+        imgs = imgs[selected_indices]
     data.append(imgs)
-    labels.append(np.full(imgs.shape[0], idx)) #Creates a numpy array of idx listed out how many ever times as in imgs.shape[0] [1,1,1,1,1,1,1 .... how many ever times for example]
+    labels.append(np.full(imgs.shape[0], idx))
+
+
+# Visual inspection: Display 3 random images from each class
+import matplotlib.pyplot as plt
+for idx, category in enumerate(categories):
+    imgs = data[idx]
+    rand_indices = np.random.choice(imgs.shape[0], 3, replace=False)
+    for i, img_idx in enumerate(rand_indices):
+        plt.subplot(1, 3, i+1)
+        plt.imshow(imgs[img_idx].reshape(28, 28), cmap='gray')
+        plt.title(f'{category}')
+        plt.axis('off')
+    plt.suptitle(f'Random samples from {category}')
+    plt.show()
 
 
 #Stacking all the arrays into one array
 X = np.concatenate(data, axis = 0)
 y = np.concatenate(labels, axis = 0)
+
+# Print label distribution before shuffling
+unique, counts = np.unique(y, return_counts=True)
+print('Label distribution before shuffling:')
+for cat, count in zip(categories, counts):
+    print(f'{cat}: {count}')
 
 #Shuffling the dataset using indices to mantain uniformity across X and Y
 indices = np.arange(X.shape[0])
@@ -87,3 +105,7 @@ print("Full model saved to backend/my_model_full.keras")
 # Save only the weights (filename must end with .weights.h5)
 model.save_weights('backend/my_model.weights.h5')
 print("Model weights saved to backend/my_model.weights.h5")
+
+
+
+

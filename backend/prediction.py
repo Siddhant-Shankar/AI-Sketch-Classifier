@@ -19,7 +19,7 @@ def process_image(img_path):
 
 
 
-img_path = 'sample_cat_2.png'  # Change this to your image path
+img_path = 'C:\CODE\AI-Sketch-Classifier\sample_car_4.png'  # Change this to your image path
 img_array = process_image(img_path)
 prediction = model.predict(img_array)
 predicted_class = np.argmax(prediction)
