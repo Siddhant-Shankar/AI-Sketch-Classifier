@@ -3,10 +3,18 @@ from fastapi import FastAPI, File, UploadFile
 from tensorflow import keras
 from PIL import Image
 import io
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 #Creating the fast API object
 
+app.add_middleware(
+       CORSMiddleware,
+       allow_origins=["*"],  # Or specify ["http://localhost:5174"] for more security
+       allow_credentials=True,
+       allow_methods=["*"],
+       allow_headers=["*"],
+   )
 
 categories = ['car', 'cat', 'dog', 'house', 'tree']
 model = keras.models.load_model('backend\my_model_full.keras')
