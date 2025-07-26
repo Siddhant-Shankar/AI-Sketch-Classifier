@@ -1,4 +1,5 @@
 import numpy as np
+import os
 from fastapi import FastAPI, File, UploadFile
 from tensorflow import keras
 from PIL import Image
@@ -17,7 +18,18 @@ app.add_middleware(
    )
 
 categories = ['car', 'cat', 'dog', 'house', 'tree']
-model = keras.models.load_model('backend\my_model_full.keras')
+
+# Get the directory where this script is located
+current_dir = os.path.dirname(os.path.abspath(__file__))
+# Go up one level to the backend directory and find the model
+model_path = os.path.join(os.path.dirname(current_dir), 'my_model_full.keras')
+
+try:
+    model = keras.models.load_model(model_path)
+    print(f"Model loaded successfully from: {model_path}")
+except Exception as e:
+    print(f"Error loading model from {model_path}: {e}")
+    raise
 
 
 def process_image(image_bytes): 
@@ -36,11 +48,29 @@ def read_root():
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
-    image_bytes = await file.read() #Reads the file from the request
-    img_arr = process_image(image_bytes) #Processes the image
-    prediction = model.predict(img_arr) #Makes a prediction using the model
-    category = categories[np.argmax(prediction)] #Gets the category with the highest probability
-    return {"category": category} #Returns the category as a JSON response
+    try:
+        image_bytes = await file.read() #Reads the file from the request
+        img_arr = process_image(image_bytes) #Processes the image
+        prediction = model.predict(img_arr) #Makes a prediction using the model
+        
+        # Get the predicted category and confidence
+        predicted_index = np.argmax(prediction[0])
+        category = categories[predicted_index]
+        confidence = float(prediction[0][predicted_index])
+        
+        # Get all category probabilities
+        probabilities = {
+            categories[i]: float(prediction[0][i]) 
+            for i in range(len(categories))
+        }
+        
+        return {
+            "category": category,
+            "confidence": confidence,
+            "probabilities": probabilities
+        }
+    except Exception as e:
+        return {"error": f"Prediction failed: {str(e)}"}
 
 
 #app.post requests handle HTTP POST requests when the client wants to send data to the server
