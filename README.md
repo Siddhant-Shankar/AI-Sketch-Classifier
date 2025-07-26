@@ -10,6 +10,15 @@ A modern React application for classifying hand-drawn sketches using AI.
 - **Responsive Design**: Works on desktop and mobile devices
 - **Modern UI**: Beautiful gradient design with smooth animations
 
+## What I Learned
+
+- Integrating frontend and backend services using Fetch
+- Handling image data between JS and Python
+- Managing state and canvas drawing logic in React
+- Deploying and testing ML models with FastAPI
+- Building my own neural network from sratch and implementing CNN's with tensorflow
+- Essential CSS Skills like Flexbox
+
 ## Getting Started
 
 ### Prerequisites
